@@ -1,0 +1,92 @@
+package com.example.g.assignment1;
+
+import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+
+public class editToDoAfterClick extends AppCompatActivity {
+    toDoDatabaseAdapter taskAdapter;
+    SQLiteDatabase db2;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_edit_to_do_after_click);
+        openDB();
+        Bundle extras = getIntent().getExtras();
+        int theRow = extras.getInt("row");
+        String theTaskName = extras.getString("taskName");
+        String theLocation = extras.getString("location");
+        String theStatus = extras.getString("status");
+        EditText etTaskName, etLocation;
+        String statusValue;
+        etTaskName = (EditText)findViewById(R.id.editName);
+        etLocation = (EditText)findViewById(R.id.editLocation);
+        RadioGroup radioGroup = (RadioGroup) findViewById(R.id.gender_radio);
+        RadioButton notCompleteButton = (RadioButton) findViewById(R.id.notComplete);
+        RadioButton CompleteButton = (RadioButton) findViewById(R.id.Complete);
+        if (theStatus.equals("Completed")) {
+            CompleteButton.setChecked(true);
+        }
+        else {
+            notCompleteButton.setChecked(true);
+        }
+        etTaskName.setText(theTaskName);
+        etLocation.setText(theLocation);
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        closeDB();
+    }
+
+    public void home(View v) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    private void openDB()
+    {
+        taskAdapter = new toDoDatabaseAdapter(this);
+        taskAdapter.open();
+    }
+
+    private void closeDB()
+    {
+        taskAdapter.close();
+    }
+
+    public void finish(View v) {
+        finish();
+    }
+
+    public void updateTaskRecord(View view)
+    {
+        Bundle extras = getIntent().getExtras();
+        int theRow = extras.getInt("row");
+        EditText etTaskName, etLocation;
+        String statusValue = "";
+        RadioGroup radioGroup = (RadioGroup)findViewById(R.id.status_radio);
+        int checkedRadioButtonId = radioGroup.getCheckedRadioButtonId();
+        if (checkedRadioButtonId == R.id.Complete)
+        {
+            statusValue = "Completed";
+        }
+        else if (checkedRadioButtonId == R.id.notComplete)
+        {
+            statusValue = "Not completed";
+        }
+        etTaskName = (EditText)findViewById(R.id.editName);
+        etLocation = (EditText)findViewById(R.id.editLocation);
+        taskAdapter.updateRow(theRow, etTaskName.getText().toString(), etLocation.getText().toString(), statusValue);
+        startActivity(new Intent(editToDoAfterClick.this, editToDo.class));
+    }
+}

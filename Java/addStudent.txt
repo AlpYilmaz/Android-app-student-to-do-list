@@ -1,0 +1,89 @@
+package com.example.g.assignment1;
+
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.RadioGroup;
+import android.view.View;
+import android.content.Intent;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+import android.database.sqlite.SQLiteDatabase;
+
+public class addStudent extends AppCompatActivity {
+    DatabaseAdapter myDbAdapter;
+    SQLiteDatabase db;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_add_student);
+        openDB();
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        closeDB();
+    }
+
+
+    private void openDB()
+    {
+        myDbAdapter = new DatabaseAdapter(this);
+        myDbAdapter.open();
+    }
+
+
+    private void closeDB()
+    {
+        myDbAdapter.close();
+    }
+
+
+    public void home(View v) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    public void finish(View v) {
+        finish();
+    }
+
+
+    public void submitRecord(View view)
+    {
+        boolean recInserted;
+        EditText etFirst, etLast, etAge, etCourse, etStudentId, etAddress;
+        TextView test;
+        String genderValue;
+        etLast = (EditText)findViewById(R.id.editlast);
+        etAddress = (EditText)findViewById(R.id.editaddress);
+        etAge = (EditText)findViewById(R.id.editage);
+        etStudentId = (EditText)findViewById(R.id.editstudentId);
+        etFirst = (EditText)findViewById(R.id.editfirst);
+        etCourse = (EditText)findViewById(R.id.editcourseStudy);
+        RadioGroup radioGroup = (RadioGroup)findViewById(R.id.gender_radio);
+        int checkedRadioButtonId = radioGroup.getCheckedRadioButtonId();
+        if (checkedRadioButtonId == R.id.male)
+        {
+            genderValue = "male";
+        }
+        else if (checkedRadioButtonId == R.id.female)
+        {
+            genderValue = "female";
+        }
+        else genderValue = "Not selected";
+        long newId = myDbAdapter.insertRow(Integer.parseInt(etStudentId.getText().toString()), Integer.parseInt(etAge.getText().toString()), etCourse.getText().toString(), etAddress.getText().toString(),
+                genderValue, etFirst.getText().toString(), etLast.getText().toString());
+        startActivity(new Intent(addStudent.this, MainActivity.class));
+    }
+
+
+}

@@ -1,0 +1,141 @@
+package com.example.g.assignment1;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import java.util.ArrayList;
+
+import android.util.SparseBooleanArray;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.ListView;
+import android.widget.ArrayAdapter;
+import android.database.sqlite.SQLiteDatabase;
+import android.content.Context;
+import android.content.ContentValues;
+import android.database.Cursor;
+import android.view.View;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+import com.example.g.assignment1.addStudent;
+import android.database.sqlite.SQLiteDatabase;
+import android.widget.Toast;
+
+
+public class editStudent extends AppCompatActivity {
+    DatabaseAdapter myDbAdapter;
+    SQLiteDatabase db;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_edit_student);
+        openDB();
+        populateList();
+        registerListClickCallback();
+    }
+
+   /*
+    public void delete(View view)
+    {
+        checkBoxViewHolder
+        ListView list = (ListView) findViewById(R.id.listView);
+        SparseBooleanArray checked = list.getCheckedItemPositions();
+        for (int i = 0; i < list.getCount(); i++) {
+            CheckBox del = (CheckBox) list.getChildAt(i).findViewById(R.id.checkbox);
+            if(del.isChecked()) {
+                list.
+            }
+        }
+    }
+    */
+
+    private void registerListClickCallback() {
+        ListView myList = (ListView)findViewById(R.id.listView);
+        myList.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                int studentId;
+                int age;
+                int row;
+                String course;
+                String address;
+                String gender;
+                String first;
+                String last;
+                Cursor cursor = myDbAdapter.getRow(id);
+                row = cursor.getInt(myDbAdapter.COL_ROWID);
+                studentId = cursor.getInt(myDbAdapter.COL_STUDENTID);
+                age = cursor.getInt(myDbAdapter.COL_AGE);
+                address = cursor.getString(myDbAdapter.COL_ADDRESS);
+                course = cursor.getString(myDbAdapter.COL_COURSE);
+                gender = cursor.getString(myDbAdapter.COL_GENDER);
+                first = cursor.getString(myDbAdapter.COL_FIRSTNAME);
+                last = cursor.getString(myDbAdapter.COL_LASTNAME);
+                Bundle extras = new Bundle();
+                extras.putInt("studentId", studentId);
+                extras.putInt("age", age);
+                extras.putInt("row", row);
+                extras.putString("address", address);
+                extras.putString("course", course);
+                extras.putString("gender", gender);
+                extras.putString("first", first);
+                extras.putString("last", last);
+                startActivity(new Intent(editStudent.this, editAfterClick.class).putExtras(extras));
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        closeDB();
+    }
+
+
+    public void home(View v) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+
+    public void clear(View view)
+    {
+        myDbAdapter.deleteAll();
+        populateList();
+    }
+    private void openDB()
+    {
+        myDbAdapter = new DatabaseAdapter(this);
+        myDbAdapter.open();
+    }
+
+
+    private void closeDB()
+    {
+        myDbAdapter.close();
+    }
+
+    public void finish(View v) {
+        finish();
+    }
+
+    private void populateList()
+    {
+        Cursor cursor = myDbAdapter.getAllRows();
+        String[] fromFieldNames = new String[] {myDbAdapter.KEY_STUDENTID};
+        int[] toViewIds = new int[] {R.id.textViewStudentId};
+        SimpleCursorAdapter myCursorAdapter;
+        myCursorAdapter = new SimpleCursorAdapter(getBaseContext(), R.layout.item_layout, cursor, fromFieldNames, toViewIds, 0);
+        ListView myList = (ListView)findViewById(R.id.listView);
+        myList.setAdapter(myCursorAdapter);
+    }
+}

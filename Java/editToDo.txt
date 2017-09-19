@@ -1,0 +1,98 @@
+package com.example.g.assignment1;
+
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
+
+public class editToDo extends AppCompatActivity {
+    toDoDatabaseAdapter taskAdapter;
+    SQLiteDatabase db2;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_edit_to_do);
+        openDB();
+        populateList();
+        registerListClickCallback();
+    }
+
+    private void registerListClickCallback() {
+        ListView myList = (ListView)findViewById(R.id.listView);
+        myList.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                String taskName;
+                String location;
+                String statusValue;
+                int row;
+                Cursor cursor = taskAdapter.getRow(id);
+                row = cursor.getInt(taskAdapter.COL_ROWID);
+                taskName = cursor.getString(taskAdapter.COL_TASKNAME);
+                location = cursor.getString(taskAdapter.COL_LOCATION);
+                statusValue = cursor.getString(taskAdapter.COL_STATUS);
+                Bundle extras = new Bundle();
+                extras.putInt("row", row);
+                extras.putString("taskName", taskName);
+                extras.putString("location", location);
+                extras.putString("status", statusValue);
+                startActivity(new Intent(editToDo.this, editToDoAfterClick.class).putExtras(extras));
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        closeDB();
+    }
+
+    private void closeDB()
+    {
+        taskAdapter.close();
+    }
+
+    public void home(View v) {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
+    }
+
+    private void populateList()
+    {
+        Cursor cursor = taskAdapter.getAllRows();
+        String[] fromFieldNames = new String[] {taskAdapter.KEY_TASKNAME};
+        int[] toViewIds = new int[] {R.id.textViewTaskName};
+        SimpleCursorAdapter myCursorAdapter;
+        myCursorAdapter = new SimpleCursorAdapter(getBaseContext(), R.layout.task_layout, cursor, fromFieldNames, toViewIds, 0);
+        ListView myList = (ListView)findViewById(R.id.listView);
+        myList.setAdapter(myCursorAdapter);
+    }
+
+    public void finish(View v) {
+        finish();
+    }
+
+    private void openDB()
+    {
+        taskAdapter = new toDoDatabaseAdapter(this);
+        taskAdapter.open();
+    }
+
+
+    public void clear(View view)
+    {
+        taskAdapter.deleteAll();
+        populateList();
+    }
+
+}
